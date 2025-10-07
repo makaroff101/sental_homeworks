@@ -1,0 +1,115 @@
+@startuml Tetris Class Diagram
+
+interface IGameState {
+  void enter()
+  void update()
+  void exit()
+}
+
+abstract class Tetromino {
+  - int x, y
+  - Block[] blocks
+  + moveDown(): void
+  + moveLeft(): void
+  + moveRight(): void
+  + rotate(): void
+  + canMoveTo(x: int, y: int): bool
+}
+
+class ShapeI extends Tetromino
+class ShapeO extends Tetromino
+class ShapeT extends Tetromino
+class ShapeL extends Tetromino
+class ShapeJ extends Tetromino
+class ShapeS extends Tetromino
+class ShapeZ extends Tetromino
+
+class Block {
+  - int x, y
+  - Color color
+}
+
+class Board {
+  - int width, height
+  - Block[][] grid
+  + clearLines(): int
+  + isCollision(tetromino: Tetromino): bool
+  + placeTetromino(tetromino: Tetromino): void
+}
+
+class GameEngine {
+  - IGameState currentState
+  - Board board
+  - ScoreManager scoreManager
+  - InputHandler inputHandler
+  - Renderer renderer
+  + run(): void
+  + setState(state: IGameState): void
+}
+
+class PlayingState implements IGameState {
+  - GameEngine engine
+  + update(): void
+}
+
+class PausedState implements IGameState {
+  + update(): void
+}
+
+class GameOverState implements IGameState {
+  + update(): void
+}
+
+interface ITetrominoFactory {
+  Tetromino createTetromino(): Tetromino
+}
+
+class RandomTetrominoFactory implements ITetrominoFactory {
+  + createTetromino(): Tetromino
+}
+
+class InputHandler {
+  - GameEngine engine
+  + handleInput(key: String): void
+}
+
+class Renderer {
+  + render(board: Board, tetromino: Tetromino): void
+}
+
+class ScoreManager {
+  - int score
+  + addLines(clearedLines: int): void
+  + getScore(): int
+}
+
+class CollisionDetector {
+  + check(tetromino: Tetromino, board: Board): bool
+}
+
+class GameEvent {
+  - String type
+  - Object data
+}
+
+interface IGameEventListener {
+  onEvent(event: GameEvent): void
+}
+
+' Relations
+GameEngine *-- Board
+GameEngine *-- ScoreManager
+GameEngine *-- InputHandler
+GameEngine *-- Renderer
+GameEngine o-- IGameState
+IGameState <|-- PlayingState
+IGameState <|-- PausedState
+IGameState <|-- GameOverState
+
+Tetromino *-- Block
+Board *-- Block
+
+ITetrominoFactory <|.. RandomTetrominoFactory
+RandomTetrominoFactory --> Tetromino
+
+@enduml
